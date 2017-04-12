@@ -1,7 +1,7 @@
 resource "aws_autoscaling_group" "consul-cluster-asg" {
   connection {
     user     = "ec2-user"
-    key_file = "${aws_key_pair.terraform.key_file}"
+    key_file = "${module.keypair.public_key}"
   }
 
   name                 = "consul-asg"

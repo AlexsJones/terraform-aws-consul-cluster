@@ -1,30 +1,33 @@
-# VPC##########################################################################
-resource "aws_vpc" "default" {
-  cidr_block           = "${var.vpc_cidr_block}"
-  enable_dns_hostnames = true
+# Keypair #####################################################################
+module "keypair" {
+  source     = "./modules/keypair"
+  key_name   = "terraform"
+  public_key = "${file("keys/ami_keys.pub")}"
+}
 
-  tags {
-    Name    = "Consul Cluster VPC"
-    Project = "consul-cluster"
-  }
+# VPC #########################################################################
+module "vpc" {
+  source         = "./modules/vpc"
+  vpc_cidr_block = "${var.vpc_cidr_block}"
+
+  vpc_name    = "consul-vpc"
+  vpc_project = "Consul"
 }
 
 # Gateway######################################################################
-resource "aws_internet_gateway" "default" {
-  vpc_id = "${aws_vpc.default.id}"
+module "gateway" {
+  source = "./modules/gateway"
+  vpc_id = "${module.vpc.id}"
 
-  tags {
-    Name    = "Consul Cluster IGW"
-    Project = "consul-cluster"
-  }
+  gateway_name    = "consul-gateway"
+  gateway_project = "Consul"
 }
 
 # Public subnet 1##############################################################
 resource "aws_subnet" "public-One" {
-  vpc_id                  = "${aws_vpc.default.id}"
+  vpc_id                  = "${module.vpc.id}"
   cidr_block              = "${var.public_cidr_block1}"
   map_public_ip_on_launch = true
-  depends_on              = ["aws_internet_gateway.default"]
   availability_zone       = "${lookup(var.availability_zone,"primary")}"
 
   tags {
@@ -34,11 +37,11 @@ resource "aws_subnet" "public-One" {
 }
 
 resource "aws_route_table" "public-One-Route" {
-  vpc_id = "${aws_vpc.default.id}"
+  vpc_id = "${module.vpc.id}"
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.default.id}"
+    gateway_id = "${module.gateway.id}"
   }
 
   tags {
@@ -54,10 +57,9 @@ resource "aws_route_table_association" "public-Assoc-One" {
 
 # Public subnet 2##############################################################
 resource "aws_subnet" "public-Two" {
-  vpc_id                  = "${aws_vpc.default.id}"
+  vpc_id                  = "${module.vpc.id}"
   cidr_block              = "${var.public_cidr_block2}"
   map_public_ip_on_launch = true
-  depends_on              = ["aws_internet_gateway.default"]
   availability_zone       = "${lookup(var.availability_zone,"secondary")}"
 
   tags {
@@ -67,11 +69,11 @@ resource "aws_subnet" "public-Two" {
 }
 
 resource "aws_route_table" "public-Two-Route" {
-  vpc_id = "${aws_vpc.default.id}"
+  vpc_id = "${module.vpc.id}"
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.default.id}"
+    gateway_id = "${module.gateway.id}"
   }
 
   tags {

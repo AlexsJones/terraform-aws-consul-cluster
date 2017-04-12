@@ -1,5 +1,5 @@
 resource "aws_launch_configuration" "consul-cluster" {
-  key_name = "${aws_key_pair.terraform.id}"
+  key_name = "${module.keypair.id}"
 
   name_prefix          = "consul-node-"
   image_id             = "${lookup(var.amazon_amis,var.region)}"

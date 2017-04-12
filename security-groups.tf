@@ -1,6 +1,6 @@
 resource "aws_security_group" "web" {
   name   = "web-sg"
-  vpc_id = "${aws_vpc.default.id}"
+  vpc_id = "${module.vpc.id}"
 
   #Not secure
   ingress {
@@ -41,7 +41,7 @@ resource "aws_security_group" "web" {
 
 resource "aws_security_group" "consul-cluster-vpc" {
   name   = "consul-cluster-sg"
-  vpc_id = "${aws_vpc.default.id}"
+  vpc_id = "${module.vpc.id}"
 
   ingress {
     from_port = "0"
