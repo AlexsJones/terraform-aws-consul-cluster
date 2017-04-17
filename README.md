@@ -11,3 +11,4 @@ terraform apply
 ssh-add keys/ami_keys
 
 ```
+[cloudcraft](resources/cloudcraft.png)
